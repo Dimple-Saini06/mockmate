@@ -1,0 +1,83 @@
+{
+  "behavioral": [
+    {
+      "id": 1,
+      "question": "Tell me about yourself.",
+      "category": "behavioral"
+    },
+    {
+      "id": 2,
+      "question": "Tell me about a time you worked in a team.",
+      "category": "behavioral"
+    },
+    {
+      "id": 3,
+      "question": "Describe a challenge you faced and how you solved it.",
+      "category": "behavioral"
+    },
+    {
+      "id": 4,
+      "question": "Why do you want to work at this company?",
+      "category": "behavioral"
+    },
+    {
+      "id": 5,
+      "question": "What is your biggest weakness?",
+      "category": "behavioral"
+    }
+  ],
+  "technical_cs": [
+    {
+      "id": 6,
+      "question": "What is the difference between an array and a linked list?",
+      "category": "technical_cs"
+    },
+    {
+      "id": 7,
+      "question": "Explain how a hash map works.",
+      "category": "technical_cs"
+    },
+    {
+      "id": 8,
+      "question": "What is the time complexity of binary search?",
+      "category": "technical_cs"
+    },
+    {
+      "id": 9,
+      "question": "What is the difference between SQL and NoSQL databases?",
+      "category": "technical_cs"
+    },
+    {
+      "id": 10,
+      "question": "Explain what an API is, in simple terms.",
+      "category": "technical_cs"
+    }
+  ],
+  "hr": [
+    {
+      "id": 11,
+      "question": "Where do you see yourself in 5 years?",
+      "category": "hr"
+    },
+    {
+      "id": 12,
+      "question": "Why should we hire you?",
+      "category": "hr"
+    },
+    {
+      "id": 13,
+      "question": "Do you have any questions for us?",
+      "category": "hr"
+    },
+    {
+      "id": 14,
+      "question": "How do you handle pressure or tight deadlines?",
+      "category": "hr"
+    },
+    {
+      "id": 15,
+      "question": "What are your salary expectations?",
+      "category": "hr"
+    }
+  ]
+}
