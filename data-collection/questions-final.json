@@ -1,0 +1,238 @@
+{
+  "technical": [
+    {
+      "id": 1,
+      "question": "What is Encapsulation?",
+      "category": "technical"
+    },
+    {
+      "id": 2,
+      "question": "What is Abstraction?",
+      "category": "technical"
+    },
+    {
+      "id": 3,
+      "question": "What is Inheritance?",
+      "category": "technical"
+    },
+    {
+      "id": 4,
+      "question": "What is Polymorphism?",
+      "category": "technical"
+    },
+    {
+      "id": 5,
+      "question": "What is the time complexity of Bubble Sort?",
+      "category": "technical"
+    },
+    {
+      "id": 6,
+      "question": "What are DDL, DML, and TCL commands?",
+      "category": "technical"
+    },
+    {
+      "id": 7,
+      "question": "What are database transactions?",
+      "category": "technical"
+    },
+    {
+      "id": 10,
+      "question": "What are Primary Keys and Foreign Keys in SQL?",
+      "category": "technical"
+    },
+    {
+      "id": 13,
+      "question": "Which AI tools have you used?",
+      "category": "technical"
+    },
+    {
+      "id": 14,
+      "question": "How have they helped you?",
+      "category": "technical"
+    },
+    {
+      "id": 15,
+      "question": "What are Relationship Queries?",
+      "category": "technical"
+    },
+    {
+      "id": 16,
+      "question": "Apex Programming What is Apex?",
+      "category": "technical"
+    },
+    {
+      "id": 17,
+      "question": "What are the features of Apex?",
+      "category": "technical"
+    },
+    {
+      "id": 18,
+      "question": "Triggers What is a Trigger?",
+      "category": "technical"
+    },
+    {
+      "id": 19,
+      "question": "When do we use Triggers?",
+      "category": "technical"
+    },
+    {
+      "id": 20,
+      "question": "What is Bulkification?",
+      "category": "technical"
+    },
+    {
+      "id": 21,
+      "question": "What are Governor Limits?",
+      "category": "technical"
+    },
+    {
+      "id": 22,
+      "question": "What is Schedulable Apex?",
+      "category": "technical"
+    },
+    {
+      "id": 23,
+      "question": "Flow What is a Record-Triggered Flow?",
+      "category": "technical"
+    },
+    {
+      "id": 24,
+      "question": "What is a Screen Flow?",
+      "category": "technical"
+    },
+    {
+      "id": 25,
+      "question": "What are Objects and Fields?",
+      "category": "technical"
+    },
+    {
+      "id": 26,
+      "question": "What is a Roll-Up Summary Field?",
+      "category": "technical"
+    },
+    {
+      "id": 27,
+      "question": "What happens when a Parent record is deleted?",
+      "category": "technical"
+    },
+    {
+      "id": 28,
+      "question": "Programming & DSA When are Stack and Queue used in real-life applications?",
+      "category": "technical"
+    },
+    {
+      "id": 29,
+      "question": "AI & Salesforce What is Agentforce?",
+      "category": "technical"
+    },
+    {
+      "id": 36,
+      "question": "Is this actually solving a real problem?",
+      "category": "technical"
+    },
+    {
+      "id": 37,
+      "question": "A mistake in your hardware circuit, your embedded logic, or your physical assembly?",
+      "category": "technical"
+    },
+    {
+      "id": 41,
+      "question": "Comfortable working on Java/Python while currently working in Swift?",
+      "category": "technical"
+    },
+    {
+      "id": 43,
+      "question": "Which Linux distributions are you most comfortable using on a daily basis?",
+      "category": "technical"
+    }
+  ],
+  "hr": [
+    {
+      "id": 8,
+      "question": "Where are you from?",
+      "category": "hr"
+    },
+    {
+      "id": 9,
+      "question": "What are your hobbies?",
+      "category": "hr"
+    },
+    {
+      "id": 11,
+      "question": "Are you ready to relocate to any city in India?",
+      "category": "hr"
+    },
+    {
+      "id": 12,
+      "question": "Why do you want to join TCS?",
+      "category": "hr"
+    },
+    {
+      "id": 30,
+      "question": "Questions asked: Why do you want to join TCS?",
+      "category": "hr"
+    },
+    {
+      "id": 31,
+      "question": "Who is the founder of TCS?",
+      "category": "hr"
+    },
+    {
+      "id": 32,
+      "question": "Who is the CEO of TCS?",
+      "category": "hr"
+    },
+    {
+      "id": 33,
+      "question": "Are you willing to relocate?",
+      "category": "hr"
+    },
+    {
+      "id": 34,
+      "question": "What is your preferred location?",
+      "category": "hr"
+    },
+    {
+      "id": 35,
+      "question": "Have you attended interviews with any other companies?",
+      "category": "hr"
+    }
+  ],
+  "behavioral": [
+    {
+      "id": 38,
+      "question": "What projects have you worked on recently?",
+      "category": "behavioral"
+    },
+    {
+      "id": 39,
+      "question": "Why are you interested in AI and Agentic Systems?",
+      "category": "behavioral"
+    },
+    {
+      "id": 40,
+      "question": "What technologies are you most comfortable with?",
+      "category": "behavioral"
+    },
+    {
+      "id": 42,
+      "question": "What inspired you to get into cybersecurity?",
+      "category": "behavioral"
+    },
+    {
+      "id": 44,
+      "question": "Can you walk me through the architecture of the Multi Cipher Toolkit you built?",
+      "category": "behavioral"
+    },
+    {
+      "id": 45,
+      "question": "What challenges did you face when designing the GUI for that toolkit?",
+      "category": "behavioral"
+    },
+    {
+      "id": 46,
+      "question": "How do you handle tight deadlines and multiple priorities?",
+      "category": "behavioral"
+    }
+  ]
+}
