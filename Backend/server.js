@@ -1,6 +1,11 @@
+require("dotenv").config();
+console.log('Key loaded:', process.env.GEMINI_API_KEY ? 'YES' : 'NO');
+
 const express = require("express");
 const path = require('path');
 const fs = require('fs');
+const { generateFollowUp } = require('./aiHelper');
+
 
 const app = express();
 const PORT = 3000;
@@ -19,7 +24,7 @@ app.get('/api/question', (req, res) => {
   const requestedCategory = req.query.category;
 
   console.log(requestedCategory);
-  
+
   let categoriesToPickFrom;
 
   if (requestedCategory && questionBank[requestedCategory]) {
@@ -42,18 +47,32 @@ app.get('/api/questions', (req, res) => {
 });
 
 const submittedAnswers = [];
-app.post('/api/submit-answer', (req, res) => {
+
+app.post('/api/submit-answer', async (req, res) => {
   console.log(req.body);
   const userAnswer = req.body.answer;      // user ka answer text
   const questionId = req.body.questionId;  // kaunse question ka jawab hai
+  const questionText = req.body.question; // frontend se asli question ka text bhi aayega
 
-    // answer ko array mein save karo
+  // answer ko array mein save karo
   submittedAnswers.push({ questionId, answer: userAnswer, timestamp: new Date() });
+  try {
+    // google ai studio api ko call karo, follow-up question generate karne ke liye
+    const followUpQuestion = await generateFollowUp(questionText, userAnswer);
 
-  res.json({
-    message: 'Answer receive ho gaya',
-    receivedAnswer: userAnswer,
-  });
+    res.json({
+      message: 'Answer receive ho gaya',
+      receivedAnswer: userAnswer,
+      followUpQuestion: followUpQuestion
+    });
+  } catch (error) {
+    console.log('AI error:', error.message);
+    res.json({
+      message: 'Answer receive ho gaya (AI follow-up fail hua)',
+      receivedAnswer: userAnswer,
+      error: error.message
+    });
+  }
 });
 
 // naya route - saare submitted answers dekhne ke liye (testing ke liye)
