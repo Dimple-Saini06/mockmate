@@ -16,14 +16,16 @@ Most mock interview tools ask generic questions and give generic AI feedback. Mo
 - [x] **Day 6** — Text cleaning and categorization (technical / HR / behavioral)
 - [x] **Day 7** — Express backend, GET /api/question endpoint
 - [x] **Day 8** — POST endpoint to receive and store user answers
-- [ ] Day 9 onward — AI integration, voice, frontend (see `MockMate-Checklist.md` for full roadmap)
+- [x] **Day 9** — AI integration (Google Gemini API) for dynamic follow-up questions
+- [x] **Day 10** — Answer scoring: filler word detection and STAR structure analysis
+- [ ] Day 11 onward — Voice input/output, React frontend (see `MockMate-Checklist.md` for full roadmap)
 
 ## Tech Stack
 
 - **Backend:** Node.js, Express
 - **Data Collection:** Axios, Cheerio, regex-based text extraction
 - **Frontend (planned):** React, Web Speech API
-- **AI (planned):** Claude/GPT API for follow-up questions and answer scoring
+- **AI:** Google Gemini API for follow-up question generation and STAR-method answer scoring
 - **Database (planned):** MongoDB
 
 ## Project Structure
@@ -47,13 +49,20 @@ mockmate/
 
 GeeksforGeeks blocks bot-like requests without a browser User-Agent header. Article content also isn't in a simple meta field — it's rendered in the page's visible HTML (headings and list items), so the scraper extracts full page text via Cheerio rather than relying on a short JSON summary field. Extracted text is cleaned (spacing fixes) before real questions are pulled out using pattern matching.
 
+## How AI Scoring Works
+
+When a user submits an answer, the backend runs two things in parallel:
+- A rule-based filler-word counter (pure JavaScript, no AI) that detects words like "um", "like", "basically"
+- A Gemini API call that checks whether the answer follows the STAR method (Situation, Task, Action, Result), gives a clarity score out of 10, and returns one specific, actionable piece of feedback
+
 ## API Endpoints
 
 ```
 GET  /                     Health check
 GET  /api/question          Random question (optionally ?category=technical|hr|behavioral)
 GET  /api/questions         All questions
-POST /api/submit-answer     Submit a user's answer (stored in memory for now)
+POST /api/submit-answer     Submit an answer; returns an AI follow-up question,
+                             filler-word count, and STAR-method scoring with feedback
 GET  /api/answers           View all submitted answers (for testing)
 ```
 
@@ -70,7 +79,7 @@ node extractQuestions.js
 node categorize.js
 
 cd ../Backend
-npm install express
+npm install express dotenv
 node server.js
 ```
 

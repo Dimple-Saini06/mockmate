@@ -4,7 +4,7 @@ console.log('Key loaded:', process.env.GEMINI_API_KEY ? 'YES' : 'NO');
 const express = require("express");
 const path = require('path');
 const fs = require('fs');
-const { generateFollowUp } = require('./aiHelper');
+const { generateFollowUp, scoreAnswer  } = require('./aiHelper');
 
 
 const app = express();
@@ -46,6 +46,30 @@ app.get('/api/questions', (req, res) => {
   res.json(questionBank);
 });
 
+
+function countFillerWords(text) {
+  const fillerWords = ['um', 'uh', 'like', 'basically', 'actually', 'matlab', 'you know', 'kind of', 'sort of'];
+  const lowerText = text.toLowerCase();
+ 
+  let totalCount = 0;
+  const breakdown = {};
+ 
+  fillerWords.forEach(word => {
+    // word boundary regex banate hain - \b matlab "poora word match karo, beech mein se nahi"
+    const escapedWord = word.replace(/ /g, '\\s+');
+    const regex = new RegExp('\\b' + escapedWord + '\\b', 'g');
+    const matches = lowerText.match(regex);
+    const count = matches ? matches.length : 0;
+    if (count > 0) {
+      breakdown[word] = count;
+      totalCount += count;
+    }
+  });
+ 
+  return { totalCount, breakdown };
+}
+
+
 const submittedAnswers = [];
 
 app.post('/api/submit-answer', async (req, res) => {
@@ -56,20 +80,31 @@ app.post('/api/submit-answer', async (req, res) => {
 
   // answer ko array mein save karo
   submittedAnswers.push({ questionId, answer: userAnswer, timestamp: new Date() });
+
+  // filler words turant count kar lo - iske liye AI ki zaroorat nahi
+  const fillerWordResult = countFillerWords(userAnswer);
+
+
   try {
     // google ai studio api ko call karo, follow-up question generate karne ke liye
-    const followUpQuestion = await generateFollowUp(questionText, userAnswer);
+    const [ followUpQuestion, scoreResult ] = await Promise.all([
+      generateFollowUp(questionText, userAnswer),
+      scoreAnswer(questionBank, userAnswer)
+    ]);
 
     res.json({
       message: 'Answer receive ho gaya',
       receivedAnswer: userAnswer,
-      followUpQuestion: followUpQuestion
+      followUpQuestion: followUpQuestion,
+      fillerWords : fillerWordResult,
+      starScore : scoreResult
     });
   } catch (error) {
     console.log('AI error:', error.message);
     res.json({
       message: 'Answer receive ho gaya (AI follow-up fail hua)',
       receivedAnswer: userAnswer,
+      fillerWords : fillerWordResult,
       error: error.message
     });
   }
