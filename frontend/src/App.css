@@ -1,0 +1,321 @@
+:root {
+  --bg: #12141b;
+  --surface: #1b1f29;
+  --surface-raised: #232838;
+  --border: #2e3444;
+  --text-primary: #f3f1ea;
+  --text-secondary: #9ba1b0;
+  --accent: #e8a94c;
+  --accent-dim: #b8823a;
+  --success: #7fb88a;
+  --danger: #c97064;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text-primary);
+}
+
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 48px 20px;
+}
+
+.stage {
+  width: 100%;
+  max-width: 620px;
+}
+
+/* header */
+.eyebrow-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+}
+
+.live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 0 rgba(232, 169, 76, 0.5);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(232, 169, 76, 0.45); }
+  70% { box-shadow: 0 0 0 8px rgba(232, 169, 76, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(232, 169, 76, 0); }
+}
+
+.title {
+  font-family: "Fraunces", serif;
+  font-weight: 500;
+  font-size: 34px;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.01em;
+}
+
+.subtitle {
+  font-family: "Space Grotesk", sans-serif;
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin: 0 0 32px 0;
+}
+
+/* buttons */
+.btn {
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  padding: 12px 22px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease, opacity 0.15s ease;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #1a1305;
+}
+
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: #f0b563;
+}
+
+.btn-primary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: transparent;
+  border-color: var(--border);
+  color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+  border-color: var(--accent-dim);
+}
+
+/* question card */
+.question-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 28px;
+  margin-top: 20px;
+  animation: fadeUp 0.35s ease;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.category-badge {
+  display: inline-block;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 100px;
+  background: rgba(232, 169, 76, 0.12);
+  color: var(--accent);
+  border: 1px solid rgba(232, 169, 76, 0.25);
+  margin-bottom: 14px;
+}
+
+.category-badge.hr {
+  background: rgba(127, 184, 138, 0.12);
+  color: var(--success);
+  border-color: rgba(127, 184, 138, 0.25);
+}
+
+.category-badge.behavioral {
+  background: rgba(201, 112, 100, 0.12);
+  color: var(--danger);
+  border-color: rgba(201, 112, 100, 0.25);
+}
+
+.question-text {
+  font-family: "Fraunces", serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: 22px;
+  line-height: 1.4;
+  margin: 0 0 20px 0;
+}
+
+.answer-textarea {
+  width: 100%;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text-primary);
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 14px;
+  padding: 14px;
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.answer-textarea:focus-visible {
+  outline: none;
+  border-color: var(--accent-dim);
+}
+
+.answer-textarea::placeholder {
+  color: var(--text-secondary);
+}
+
+.actions-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 14px;
+}
+
+/* loading waveform */
+.waveform {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-right: 8px;
+}
+
+.waveform span {
+  width: 3px;
+  height: 10px;
+  background: #1a1305;
+  border-radius: 2px;
+  animation: wave 0.9s ease-in-out infinite;
+}
+
+.waveform span:nth-child(2) { animation-delay: 0.15s; }
+.waveform span:nth-child(3) { animation-delay: 0.3s; }
+.waveform span:nth-child(4) { animation-delay: 0.45s; }
+
+@keyframes wave {
+  0%, 100% { transform: scaleY(0.4); }
+  50% { transform: scaleY(1.2); }
+}
+
+/* feedback panel */
+.feedback-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 28px;
+  margin-top: 20px;
+  animation: fadeUp 0.4s ease;
+}
+
+.feedback-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 22px;
+}
+
+.gauge-label {
+  font-family: "Space Grotesk", sans-serif;
+}
+
+.gauge-label .gauge-title {
+  font-size: 15px;
+  font-weight: 500;
+  margin: 0 0 3px 0;
+}
+
+.gauge-label .gauge-sub {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.feedback-row {
+  margin-bottom: 16px;
+}
+
+.feedback-row:last-child {
+  margin-bottom: 0;
+}
+
+.feedback-label {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin: 0 0 6px 0;
+}
+
+.feedback-text {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.filler-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 12px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  padding: 4px 10px;
+  border-radius: 100px;
+  color: var(--text-secondary);
+}
+
+.chip strong {
+  color: var(--text-primary);
+}
+
+.followup-block {
+  background: rgba(232, 169, 76, 0.08);
+  border-left: 2px solid var(--accent);
+  padding: 12px 16px;
+  border-radius: 0 8px 8px 0;
+}
+
+.followup-block p {
+  font-family: "Fraunces", serif;
+  font-style: italic;
+  font-size: 16px;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* responsive */
+@media (max-width: 480px) {
+  .title { font-size: 26px; }
+  .question-text { font-size: 19px; }
+  .question-card, .feedback-panel { padding: 20px; }
+}

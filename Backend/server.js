@@ -2,12 +2,20 @@ require("dotenv").config();
 console.log('Key loaded:', process.env.GEMINI_API_KEY ? 'YES' : 'NO');
 
 const express = require("express");
+const cors = require("cors");
 const path = require('path');
 const fs = require('fs');
 const { generateFollowUp, scoreAnswer  } = require('./aiHelper');
 
 
 const app = express();
+
+// sirf apne frontend (Vite dev server) ko allow kiya hai, koi bhi website nahi -
+// yeh production-style, security-conscious practice hai
+app.use(cors({
+  origin: "http://localhost:5173"
+}));
+
 const PORT = 3000;
 
 app.use(express.urlencoded({ extended: true }))
@@ -81,9 +89,7 @@ app.post('/api/submit-answer', async (req, res) => {
   // answer ko array mein save karo
   submittedAnswers.push({ questionId, answer: userAnswer, timestamp: new Date() });
 
-  // filler words turant count kar lo - iske liye AI ki zaroorat nahi
   const fillerWordResult = countFillerWords(userAnswer);
-
 
   try {
     // google ai studio api ko call karo, follow-up question generate karne ke liye
