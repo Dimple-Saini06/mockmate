@@ -43,7 +43,12 @@ function App() {
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [voiceSupported, setVoiceSupported] = useState(true);
+
   const recognitionRef = useRef(null);
+
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
+  const [audioUrl, setAudioUrl] = useState(null);
 
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -65,50 +70,83 @@ function App() {
     window.speechSynthesis.speak(utterance);
   }
 
-  function startListening() {
-  console.log('Step 1: function called');
+  async function startListening() {
+    console.log('Step 1: function called');
 
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  console.log('Step 2: SpeechRecognition =', SpeechRecognition);
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    console.log('Step 2: SpeechRecognition =', SpeechRecognition);
 
-  if (!SpeechRecognition) return;
+    if (!SpeechRecognition) return;
 
-  const recognition = new SpeechRecognition();
-  recognition.continuous = true;
-  recognition.interimResults = true;
-  recognition.lang = 'en-IN';
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-IN';
 
-  recognition.onstart = () => console.log('Step 3: recognition actually started');
+    recognition.onstart = () => console.log('Step 3: recognition actually started');
 
-  recognition.onresult = (event) => {
-    console.log('Step 4: got voice result', event);
-    let transcript = '';
-    for (let i = 0; i < event.results.length; i++) {
-      transcript += event.results[i][0].transcript;
+    recognition.onresult = (event) => {
+      console.log('Step 4: got voice result', event);
+      let transcript = '';
+      for (let i = 0; i < event.results.length; i++) {
+        transcript += event.results[i][0].transcript;
+      }
+      setAnswer(transcript);
+    };
+
+    recognition.onerror = (event) => {
+      console.log('ERROR:', event.error);
+    };
+
+    recognition.onend = () => {
+      console.log('Step 5: recognition ended');
+      setIsListening(false);
+    };
+
+    recognitionRef.current = recognition;
+    recognition.start();
+    console.log('Step 6: recognition.start() was called');
+    setIsListening(true);
+
+    // purani recording ka URL clean up karo (memory leak se bachne ke liye)
+    if(audioUrl){
+      URL.revokeObjectURL(audioUrl);
+      setAudioUrl(null);
     }
-    setAnswer(transcript);
-  };
 
-  recognition.onerror = (event) => {
-    console.log('ERROR:', event.error);
-  };
+     // actual audio bhi record karo, taaki baad mein sun sakein
+    try{
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      audioChunksRef.current = [];
 
-  recognition.onend = () => {
-    console.log('Step 5: recognition ended');
-    setIsListening(false);
-  };
+      mediaRecorder.ondataavailable = (event) => {
+        audioChunksRef.current.push(event.data);
+      };
 
-  recognitionRef.current = recognition;
-  recognition.start();
-  console.log('Step 6: recognition.start() was called');
-  setIsListening(true);
-}
+      mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type : 'audio/webm' });
+        const url = URL.createObjectURL(audioBlob);
+        setAudioUrl(url);
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      mediaRecorder.start();
+
+      mediaRecorderRef.current = mediaRecorder;
+    }catch(err){
+      console.log('Audio recording error:', err.message);
+    }   
+  }
 
   function stopListening() {
     if (recognitionRef.current) {
       recognitionRef.current.stop();
     }
 
+    if(mediaRecorderRef.current || mediaRecorderRef.current.state !== 'inactive'){
+      mediaRecorderRef.current.stop();  
+    }
     setIsListening(false);
   }
 
@@ -191,6 +229,13 @@ function App() {
               placeholder="Answer like you would in the room..."
               rows={5}
             />
+
+            {audioUrl && (
+              <div className='playback-row'>
+                <p className='feedback-label'>Your Recording</p>
+                <audio controls src={audioUrl} className='audio-player' />
+              </div>
+            )}
 
             <div className="actions-row">
               <button
