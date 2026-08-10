@@ -31,7 +31,7 @@ app.get('/', (req, res) => {
 app.get('/api/question', (req, res) => {
   const requestedCategory = req.query.category;
 
-  console.log(requestedCategory);
+  console.log("requestedCategory : ",requestedCategory);
 
   let categoriesToPickFrom;
 
@@ -81,7 +81,7 @@ function countFillerWords(text) {
 const submittedAnswers = [];
 
 app.post('/api/submit-answer', async (req, res) => {
-  console.log(req.body);
+  console.log("/api/submit-answer : ", req.body);
   const userAnswer = req.body.answer;      // user ka answer text
   const questionId = req.body.questionId;  // kaunse question ka jawab hai
   const questionText = req.body.question; // frontend se asli question ka text bhi aayega

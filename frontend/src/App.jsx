@@ -1,17 +1,17 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import './App.css';
- 
+
 // Circular "confidence gauge" - clarity score ko ek ring ke roop mein dikhata hai
 function ClarityGauge({ score }) {
   const radius = 32;
   const circumference = 2 * Math.PI * radius;
   const progress = (score / 10) * circumference;
   const offset = circumference - progress;
- 
+
   let color = 'var(--danger)';
   if (score >= 7) color = 'var(--success)';
   else if (score >= 4) color = 'var(--accent)';
- 
+
   return (
     <svg width="80" height="80" viewBox="0 0 80 80">
       <circle cx="40" cy="40" r={radius} fill="none" stroke="var(--border)" strokeWidth="6" />
@@ -34,24 +34,98 @@ function ClarityGauge({ score }) {
     </svg>
   );
 }
- 
+
 function App() {
   const [question, setQuestion] = useState(null);
   const [answer, setAnswer] = useState('');
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
- 
+  const [isListening, setIsListening] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [voiceSupported, setVoiceSupported] = useState(true);
+  const recognitionRef = useRef(null);
+
+  useEffect(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    console.log('SpeechRecognition found:', SpeechRecognition);
+    if (!SpeechRecognition) {
+      setVoiceSupported(false);
+    }
+  }, []);
+
+  function speakQuestion(text) {
+    if (!window.speechSynthesis) return;
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 0.95;
+
+    utterance.onstart = () => setIsSpeaking(true);
+    utterance.onend = () => setIsSpeaking(false);
+
+    window.speechSynthesis.speak(utterance);
+  }
+
+  function startListening() {
+  console.log('Step 1: function called');
+
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  console.log('Step 2: SpeechRecognition =', SpeechRecognition);
+
+  if (!SpeechRecognition) return;
+
+  const recognition = new SpeechRecognition();
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.lang = 'en-IN';
+
+  recognition.onstart = () => console.log('Step 3: recognition actually started');
+
+  recognition.onresult = (event) => {
+    console.log('Step 4: got voice result', event);
+    let transcript = '';
+    for (let i = 0; i < event.results.length; i++) {
+      transcript += event.results[i][0].transcript;
+    }
+    setAnswer(transcript);
+  };
+
+  recognition.onerror = (event) => {
+    console.log('ERROR:', event.error);
+  };
+
+  recognition.onend = () => {
+    console.log('Step 5: recognition ended');
+    setIsListening(false);
+  };
+
+  recognitionRef.current = recognition;
+  recognition.start();
+  console.log('Step 6: recognition.start() was called');
+  setIsListening(true);
+}
+
+  function stopListening() {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+    }
+
+    setIsListening(false);
+  }
+
+
   async function fetchQuestion() {
     const response = await fetch('http://localhost:3000/api/question');
     const data = await response.json();
     setQuestion(data);
     setResult(null);
     setAnswer('');
+    speakQuestion(data.question);
   }
- 
+
   async function submitAnswer() {
+    stopListening();
     setLoading(true);
- 
+
     const response = await fetch('http://localhost:3000/api/submit-answer', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -61,12 +135,13 @@ function App() {
         questionId: question.id
       })
     });
- 
+
     const data = await response.json();
     setResult(data);
     setLoading(false);
+
   }
- 
+
   return (
     <div className="app-shell">
       <div className="stage">
@@ -76,18 +151,39 @@ function App() {
         </div>
         <h1 className="title">MockMate</h1>
         <p className="subtitle">Real interview questions. Honest feedback. No fluff.</p>
- 
+
+        {!voiceSupported && (
+          <p className='voice-warning'>
+            Voice features work best in Chrome or Edge. Typing still works fine here.
+          </p>
+        )}
         <button className="btn btn-secondary" onClick={fetchQuestion}>
           {question ? 'Next Question' : 'Get a Question'}
         </button>
- 
+
         {question && (
           <div className="question-card">
             <span className={`category-badge ${question.category}`}>
               {question.category}
             </span>
+
+            {isSpeaking && (
+              <div className='status-pill speaking'>
+                <span className='waveform'>
+                  <span></span><span></span><span></span><span></span>
+                </span>
+                AI is asking...
+              </div>
+            )}
+
+            {isListening && (
+              <div className='status-pill listening'>
+                <span className='rec-dot'></span>
+                Listening...
+              </div>
+            )}
             <p className="question-text">"{question.question}"</p>
- 
+
             <textarea
               className="answer-textarea"
               value={answer}
@@ -95,8 +191,17 @@ function App() {
               placeholder="Answer like you would in the room..."
               rows={5}
             />
- 
+
             <div className="actions-row">
+              <button
+                className='btn btn-mic'
+                onClick={isListening ? stopListening : startListening}
+                disabled={!voiceSupported}
+                title={voiceSupported ? 'Toggle microphone' : 'Voice not supported in this browser'}
+              >
+                {isListening ? 'Stop Mic' : 'Start Mic'}
+              </button>
+
               <button className="btn btn-primary" onClick={submitAnswer} disabled={loading || !answer}>
                 {loading && (
                   <span className="waveform">
@@ -108,7 +213,7 @@ function App() {
             </div>
           </div>
         )}
- 
+
         {result && (
           <div className="feedback-panel">
             <div className="feedback-header">
@@ -118,12 +223,12 @@ function App() {
                 <p className="gauge-sub">Based on structure and directness</p>
               </div>
             </div>
- 
+
             <div className="feedback-row">
               <p className="feedback-label">Feedback</p>
               <p className="feedback-text">{result.starScore?.feedback}</p>
             </div>
- 
+
             <div className="feedback-row">
               <p className="feedback-label">Filler Words ({result.fillerWords?.totalCount ?? 0})</p>
               <div className="filler-chips">
@@ -138,7 +243,7 @@ function App() {
                 )}
               </div>
             </div>
- 
+
             <div className="feedback-row">
               <p className="feedback-label">Interviewer Follow-up</p>
               <div className="followup-block">
@@ -151,5 +256,5 @@ function App() {
     </div>
   );
 }
- 
+
 export default App;
