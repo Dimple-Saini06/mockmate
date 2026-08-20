@@ -1,0 +1,90 @@
+.outer-div {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  padding: 20px;
+}
+ 
+.inner-div {
+  width: 100%;
+  max-width: 380px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 32px;
+}
+ 
+.title {
+  font-family: "Fraunces", serif;
+  font-weight: 500;
+  font-size: 28px;
+  margin: 0 0 6px 0;
+  color: var(--text-primary);
+  text-align: center;
+}
+ 
+.sub-title {
+  font-family: "Space Grotesk", sans-serif;
+  color: var(--text-secondary);
+  font-size: 13px;
+  text-align: center;
+  margin: 0 0 24px 0;
+}
+ 
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+ 
+.auth-input {
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 14px;
+  padding: 12px 14px;
+}
+ 
+.auth-input:focus-visible {
+  outline: none;
+  border-color: var(--accent-dim);
+}
+ 
+.auth-input::placeholder {
+  color: var(--text-secondary);
+}
+ 
+.auth-error {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 13px;
+  color: var(--danger);
+  margin: 0;
+}
+ 
+.auth-submit {
+  width: 100%;
+  margin-top: 6px;
+}
+ 
+.auth-toggle {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-align: center;
+  margin-top: 20px;
+}
+ 
+.auth-toggle span {
+  color: var(--accent);
+  cursor: pointer;
+  font-weight: 500;
+}
+ 
+.auth-toggle span:hover {
+  text-decoration: underline;
+}
+ 

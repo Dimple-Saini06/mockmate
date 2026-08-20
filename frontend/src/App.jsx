@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import Auth from './Auth.jsx';
 import './App.css';
 
 // Circular "confidence gauge" - clarity score ko ek ring ke roop mein dikhata hai
@@ -45,6 +46,31 @@ function App() {
   const [voiceSupported, setVoiceSupported] = useState(true);
 
   const recognitionRef = useRef(null);
+
+  const[user, setUser] = useState(()=>{
+    const savedUser = localStorage.getItem('user');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
+
+  const [theme, setTheme] = useState(()=>{
+    return localStorage.getItem('theme') || 'dark';
+  });
+
+  useEffect(()=>{
+    document.documentElement.setAttribute('data-theme',theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  function toggleTheme(){
+    setTheme(theme === 'dark' ? 'light' : 'dark');
+  }
+
+  function handleLogout(){
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setUser(null);
+  }
+
 
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
@@ -180,6 +206,10 @@ function App() {
 
   }
 
+  if(!user){
+    return <Auth onLoginSuccess={(loggedInUser) => setUser(loggedInUser)} />
+  }
+
   return (
     <div className="app-shell">
       <div className="stage">
@@ -187,8 +217,24 @@ function App() {
           <span className="live-dot"></span>
           Practice Session
         </div>
-        <h1 className="title">MockMate</h1>
-        <p className="subtitle">Real interview questions. Honest feedback. No fluff.</p>
+
+        <div className='header-row'>
+          <div>
+              <h1 className="title">MockMate</h1>
+              <p className="subtitle">Real interview questions. Honest feedback. No fluff.</p>
+          </div>
+
+          <div className='header-buttons'>
+            <button className="btn btn-secondary theme-btn" onClick={toggleTheme}>
+              { theme === 'dark' ? 'Light Mode' : 'Dark Mode' }
+            </button>
+            <button className="btn btn-secondary logout-btn" onClick={handleLogout}>
+              Logout
+            </button>
+          </div>
+          
+        </div>
+        
 
         {!voiceSupported && (
           <p className='voice-warning'>

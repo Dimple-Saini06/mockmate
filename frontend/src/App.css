@@ -1,4 +1,5 @@
-:root {
+:root,
+[data-theme="dark"] {
   --bg: #12141b;
   --surface: #1b1f29;
   --surface-raised: #232838;
@@ -9,6 +10,23 @@
   --accent-dim: #b8823a;
   --success: #7fb88a;
   --danger: #c97064;
+}
+
+[data-theme="light"] {
+  --bg: #faf8f3;
+  --surface: #ffffff;
+  --surface-raised: #f2efe8;
+  --border: #ddd7c9;
+  --text-primary: #23201a;
+  --text-secondary: #6b6559;
+  --accent: #b8752f;
+  --accent-dim: #935e26;
+  --success: #4a8a58;
+  --danger: #a8493a;
+}
+
+body {
+  transition: background 0.2s ease, color 0.2s ease;
 }
 
 * {
@@ -397,4 +415,28 @@ body {
   width: 100%;
   height: 36px;
   margin-top: 6px;
+}
+
+
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.logout-btn {
+  padding: 8px 16px;
+  font-size: 13px;
+}
+
+
+.header-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.theme-btn {
+  padding: 8px 16px;
+  font-size: 13px;
 }

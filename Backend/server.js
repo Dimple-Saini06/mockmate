@@ -2,11 +2,14 @@ require("dotenv").config();
 console.log('Key loaded:', process.env.GEMINI_API_KEY ? 'YES' : 'NO');
 
 const express = require("express");
+const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
+const User = require("./models/User");
+const jwt = require("jsonwebtoken");
 const cors = require("cors");
 const path = require('path');
 const fs = require('fs');
 const { generateFollowUp, scoreAnswer  } = require('./aiHelper');
-
 
 const app = express();
 
@@ -20,6 +23,75 @@ const PORT = 3000;
 
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json());
+
+
+//DB WORK
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => console.log('MongoDB connected successfully'))
+  .catch((err) => console.log('MongoDB connection error:', err.message));
+
+
+// Signup route
+app.post('/api/signup', async(req,res)=>{
+  try{
+    const{name, email, password} = req.body;
+    let existingMail = await User.findOne({ email });
+
+    if(existingMail){
+      return res.status(400).json({ message: 'Email already registered' });
+    }
+
+    // password ko hash (encrypt) karo, plain text save nahi karte
+    const hashedPswd = await bcrypt.hash(password, 10);
+    const newUser = new User({
+      name, 
+      email, 
+      password : hashedPswd
+    });
+
+    await newUser.save();
+    
+    res.status(201).json({ message: 'Signup successful' });
+
+  }catch(error){
+    res.status(500).json({ message: 'Signup failed', error: error.message });
+  }
+});
+
+
+// Login route
+app.post("/api/login", async(req,res)=>{
+  try {
+    const{ email, password } = req.body;
+    const user = await User.findOne({email});
+    console.log(user);
+    if(!user){
+      return res.status(400).json({ message : 'Invalid email or password' });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if(!isMatch){
+      return res.status(400).json({ message : 'Invalid email or password' });
+    }
+
+    // sab sahi hai - ek token banao jo login ka proof hai
+    const token = jwt.sign(
+      { userId : user._id },
+      process.env.JWT_SECRET,
+      {expiresIn : '7d'} //expires after 7days
+    );
+
+    res.json({
+      message : "Login successful",
+      token : token,
+      user : {name : user.name, email : user.email}
+    });
+  }catch(e){
+    res.status(500).json({ message : 'Login Failed', e : e.message});
+  }
+});
+
+
 
 const questionPath = path.join(__dirname, '..', 'data-collection', 'questions-final.json');
 const questionBank = JSON.parse(fs.readFileSync(questionPath, 'utf-8'));
