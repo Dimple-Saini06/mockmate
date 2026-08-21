@@ -26,6 +26,9 @@ export default function Auth({ onLoginSuccess }){
 
             const data = await response.json();
 
+            console.log("response : ",response, data);
+
+
             if(!response.ok){
                 setError(data.message);
                 setLoading(false);

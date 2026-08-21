@@ -1,6 +1,6 @@
 require("dotenv").config();
 console.log('Key loaded:', process.env.GEMINI_API_KEY ? 'YES' : 'NO');
-
+console.log('Groq key starts with:', process.env.GROQ_API_KEY?.substring(0, 8));
 const express = require("express");
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
