@@ -3,12 +3,19 @@ const express = require("express");
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const User = require("./models/User");
-const Question = require("./models/Question");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
 const path = require('path');
 const fs = require('fs');
 const { generateFollowUp, scoreAnswer, sourceQuestionsWithAI } = require('./aiHelper');
+const multer = require('multer');
+const { PDFParse } = require('pdf-parse');
+// console.log('pdfParse type:', typeof pdfParse);
+// console.log('pdfParse content:', pdfParse);
+
+// multer ko memory mein file rakhne ke liye set kiya - disk pe save nahi karte,
+// kyunki humein sirf text nikaalna hai, file permanently rakhni nahi hai
+const upload = multer({ storage: multer.memoryStorage() });
 
 const app = express();
 
@@ -17,80 +24,78 @@ const app = express();
 app.use(cors({
   origin: "http://localhost:5173"
 }));
-
 const PORT = 3000;
 
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json());
 
-
-//DB WORK
+// MongoDB se connect karo
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('MongoDB connected successfully'))
   .catch((err) => console.log('MongoDB connection error:', err.message));
 
+// Signup route - naya user banata hai
+app.post('/api/signup', async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
 
-// Signup route
-app.post('/api/signup', async(req,res)=>{
-  try{
-    const{name, email, password} = req.body;
-    let existingMail = await User.findOne({ email });
-
-    if(existingMail){
+    // check karo yeh email pehle se registered toh nahi hai
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
       return res.status(400).json({ message: 'Email already registered' });
     }
 
     // password ko hash (encrypt) karo, plain text save nahi karte
-    const hashedPswd = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // naya user database mein save karo
     const newUser = new User({
-      name, 
-      email, 
-      password : hashedPswd
+      name,
+      email,
+      password: hashedPassword
     });
 
     await newUser.save();
-    
-    res.status(201).json({ message: 'Signup successful' });
 
-  }catch(error){
+    res.status(201).json({ message: 'Signup successful' });
+  } catch (error) {
     res.status(500).json({ message: 'Signup failed', error: error.message });
   }
 });
 
-
-// Login route
-app.post("/api/login", async(req,res)=>{
+// Login route - existing user ko verify karta hai
+app.post('/api/login', async (req, res) => {
   try {
-    const{ email, password } = req.body;
-    const user = await User.findOne({email});
-    console.log(user);
-    if(!user){
-      return res.status(400).json({ message : 'Invalid email or password' });
+    const { email, password } = req.body;
+
+    // check karo yeh email exist karta hai
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid email or password' });
     }
 
+    // entered password ko hashed password se compare karo
     const isMatch = await bcrypt.compare(password, user.password);
-    if(!isMatch){
-      return res.status(400).json({ message : 'Invalid email or password' });
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Invalid email or password' });
     }
 
     // sab sahi hai - ek token banao jo login ka proof hai
     const token = jwt.sign(
-      { userId : user._id },
+      { userId: user._id },
       process.env.JWT_SECRET,
-      {expiresIn : '7d'} //expires after 7days
+      { expiresIn: '7d' }   // 7 din ke baad token expire ho jaayega
     );
 
     res.json({
-      message : "Login successful",
-      token : token,
-      user : {name : user.name, email : user.email}
+      message: 'Login successful',
+      token: token,
+      user: { name: user.name, email: user.email }
     });
-  }catch(e){
-    res.status(500).json({ message : 'Login Failed', e : e.message});
+  } catch (error) {
+    res.status(500).json({ message: 'Login failed', error: error.message });
   }
 });
-
-
 
 const questionPath = path.join(__dirname, '..', 'data-collection', 'questions-final.json');
 const questionBank = JSON.parse(fs.readFileSync(questionPath, 'utf-8'));
@@ -101,16 +106,11 @@ app.get('/', (req, res) => {
 
 app.get('/api/question', (req, res) => {
   const requestedCategory = req.query.category;
-
-  console.log("requestedCategory : ",requestedCategory);
-
   let categoriesToPickFrom;
 
   if (requestedCategory && questionBank[requestedCategory]) {
-    console.log("if [requestedCategory] : ", [requestedCategory]);
     categoriesToPickFrom = [requestedCategory];
   } else {
-    console.log("else [requestedCategory] : ", Object.keys(questionBank));
     categoriesToPickFrom = Object.keys(questionBank);
   }
 
@@ -126,17 +126,20 @@ app.get('/api/questions', (req, res) => {
 });
 
 // AI-driven question sourcing - Tavily se search, Groq se extract, source link ke saath
-app.get("/api/source-questions", async(req, res)=>{
-  try{
+app.get('/api/source-questions', async (req, res) => {
+  try {
     const company = req.query.company;
     const role = req.query.role;
 
-    if(!company || !role){
-      return res.status(400).json({ message : 'company aur role dono chahiye query params mein' });
+    if (!company || !role) {
+      return res.status(400).json({ message: 'company aur role dono chahiye query params mein' });
     }
 
     const questions = await sourceQuestionsWithAI(company, role);
+
     // in questions ko questionBank mein bhi daal do, taaki /api/question inhe bhi de sake
+    // (memory mein hi rehta hai - server restart hone par yeh naye sourced questions gayab ho jaayenge,
+    // permanent rakhne ke liye database chahiye hoga)
     questions.forEach((q, i) => {
       const newQuestion = {
         id: `sourced-${company}-${Date.now()}-${i}`,
@@ -147,24 +150,26 @@ app.get("/api/source-questions", async(req, res)=>{
       };
       questionBank.technical.push(newQuestion);
     });
-    res.json( {
-      company, 
+
+    res.json({
+      company,
       role,
-      count : questions.length,
+      count: questions.length,
       questions
     });
-  }catch(error){
-    res.status(500).json({ message : 'Sourcing failed', error: error.message })
+  } catch (error) {
+    res.status(500).json({ message: 'Sourcing failed', error: error.message });
   }
 });
 
+// filler words ko count karta hai - yeh pure code hai, AI nahi (fast aur free)
 function countFillerWords(text) {
   const fillerWords = ['um', 'uh', 'like', 'basically', 'actually', 'matlab', 'you know', 'kind of', 'sort of'];
   const lowerText = text.toLowerCase();
- 
+
   let totalCount = 0;
   const breakdown = {};
- 
+
   fillerWords.forEach(word => {
     // word boundary regex banate hain - \b matlab "poora word match karo, beech mein se nahi"
     const escapedWord = word.replace(/ /g, '\\s+');
@@ -176,27 +181,26 @@ function countFillerWords(text) {
       totalCount += count;
     }
   });
- 
+
   return { totalCount, breakdown };
 }
 
-
 const submittedAnswers = [];
 
+// ab yeh route "async" hai kyunki AI calls ka wait karna padta hai
 app.post('/api/submit-answer', async (req, res) => {
-  console.log("/api/submit-answer : ", req.body);
-  const userAnswer = req.body.answer;      // user ka answer text
-  const questionId = req.body.questionId;  // kaunse question ka jawab hai
+  const userAnswer = req.body.answer;
+  const questionId = req.body.questionId;
   const questionText = req.body.question; // frontend se asli question ka text bhi aayega
 
-  // answer ko array mein save karo
   submittedAnswers.push({ questionId, answer: userAnswer, timestamp: new Date() });
 
+  // filler words turant count kar lo - iske liye AI ki zaroorat nahi
   const fillerWordResult = countFillerWords(userAnswer);
 
   try {
-    // google ai studio api ko call karo, follow-up question generate karne ke liye
-    const [ followUpQuestion, scoreResult ] = await Promise.all([
+    // dono AI calls ek saath chalao (Promise.all se dono ka wait ek saath hota hai, alag-alag nahi)
+    const [followUpQuestion, scoreResult] = await Promise.all([
       generateFollowUp(questionText, userAnswer),
       scoreAnswer(questionText, userAnswer)
     ]);
@@ -205,26 +209,46 @@ app.post('/api/submit-answer', async (req, res) => {
       message: 'Answer receive ho gaya',
       receivedAnswer: userAnswer,
       followUpQuestion: followUpQuestion,
-      fillerWords : fillerWordResult,
-      starScore : scoreResult
+      fillerWords: fillerWordResult,
+      starScore: scoreResult
     });
   } catch (error) {
     console.log('AI error:', error.message);
     res.json({
-      message: 'Answer receive ho gaya (AI follow-up fail hua)',
+      message: 'Answer receive ho gaya (AI processing fail hua)',
       receivedAnswer: userAnswer,
-      fillerWords : fillerWordResult,
+      fillerWords: fillerWordResult,
       error: error.message
     });
   }
 });
 
-// naya route - saare submitted answers dekhne ke liye (testing ke liye)
-app.get('/api/answers', (req, res) => {
-  // console.log("'/api/answers api call!");
-  res.json(submittedAnswers);
+// resume PDF upload karta hai aur text nikaalta hai
+app.post('/api/upload-resume', upload.single('resume'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'Koi file nahi mili' });
+    }
+
+    // req.file.buffer mein poori PDF ka raw data hai (memory storage ki wajah se)
+    const parser = new PDFParse({ data: req.file.buffer });
+    const result = await parser.getText();
+    await parser.destroy();   // memory free karne ke liye
+
+
+    res.json({
+      message: 'Resume padh liya',
+      textLength: result.text.length,
+      extractedText: result.text
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Resume padhne mein error aaya', error: error.message });
+  }
 });
 
+app.get('/api/answers', (req, res) => {
+  res.json(submittedAnswers);
+});
 
 app.listen(PORT, () => {
   console.log(`Server chal raha hai: http://localhost:${PORT}`)

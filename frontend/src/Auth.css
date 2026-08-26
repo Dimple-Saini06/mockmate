@@ -88,3 +88,71 @@
   text-decoration: underline;
 }
  
+
+/* resume upload / setup screen */
+.setup-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 32px;
+  margin: 40px auto;
+}
+ 
+.setup-title {
+  font-family: "Fraunces", serif;
+  font-weight: 500;
+  font-size: 24px;
+  margin: 0 0 6px 0;
+  color: var(--text-primary);
+  text-align: center;
+}
+ 
+.setup-subtitle {
+  font-family: "Space Grotesk", sans-serif;
+  color: var(--text-secondary);
+  font-size: 13px;
+  text-align: center;
+  margin: 0 0 24px 0;
+}
+ 
+.file-upload-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  padding: 24px;
+  cursor: pointer;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 14px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+ 
+.file-upload-box:hover {
+  border-color: var(--accent-dim);
+}
+ 
+.file-input-hidden {
+  display: none;
+}
+ 
+.setup-submit {
+  width: 100%;
+  margin-top: 16px;
+}
+ 
+.setup-skip {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 13px;
+  color: var(--accent);
+  text-align: center;
+  margin-top: 16px;
+  cursor: pointer;
+}
+ 
+.setup-skip:hover {
+  text-decoration: underline;
+}
