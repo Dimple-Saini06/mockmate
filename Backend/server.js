@@ -1,15 +1,14 @@
 require("dotenv").config();
-console.log('Key loaded:', process.env.GEMINI_API_KEY ? 'YES' : 'NO');
-console.log('Groq key starts with:', process.env.GROQ_API_KEY?.substring(0, 8));
 const express = require("express");
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const User = require("./models/User");
+const Question = require("./models/Question");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
 const path = require('path');
 const fs = require('fs');
-const { generateFollowUp, scoreAnswer  } = require('./aiHelper');
+const { generateFollowUp, scoreAnswer, sourceQuestionsWithAI } = require('./aiHelper');
 
 const app = express();
 
@@ -126,6 +125,38 @@ app.get('/api/questions', (req, res) => {
   res.json(questionBank);
 });
 
+// AI-driven question sourcing - Tavily se search, Groq se extract, source link ke saath
+app.get("/api/source-questions", async(req, res)=>{
+  try{
+    const company = req.query.company;
+    const role = req.query.role;
+
+    if(!company || !role){
+      return res.status(400).json({ message : 'company aur role dono chahiye query params mein' });
+    }
+
+    const questions = await sourceQuestionsWithAI(company, role);
+    // in questions ko questionBank mein bhi daal do, taaki /api/question inhe bhi de sake
+    questions.forEach((q, i) => {
+      const newQuestion = {
+        id: `sourced-${company}-${Date.now()}-${i}`,
+        question: q.question,
+        company: company,
+        difficulty: q.difficulty,
+        sourceUrl: q.sourceUrl
+      };
+      questionBank.technical.push(newQuestion);
+    });
+    res.json( {
+      company, 
+      role,
+      count : questions.length,
+      questions
+    });
+  }catch(error){
+    res.status(500).json({ message : 'Sourcing failed', error: error.message })
+  }
+});
 
 function countFillerWords(text) {
   const fillerWords = ['um', 'uh', 'like', 'basically', 'actually', 'matlab', 'you know', 'kind of', 'sort of'];
@@ -167,7 +198,7 @@ app.post('/api/submit-answer', async (req, res) => {
     // google ai studio api ko call karo, follow-up question generate karne ke liye
     const [ followUpQuestion, scoreResult ] = await Promise.all([
       generateFollowUp(questionText, userAnswer),
-      scoreAnswer(questionBank, userAnswer)
+      scoreAnswer(questionText, userAnswer)
     ]);
 
     res.json({

@@ -27,7 +27,19 @@ Most mock interview tools ask generic questions and give generic AI feedback. Mo
 - [x] **Day 17** — Signup/Login UI (React)
 - [x] **Day 18** — Full auth flow connected end-to-end, persistent login via localStorage
 - [x] **Day 19** — Light/dark theme toggle
-- [ ] Next — AI-driven multi-source question sourcing (Google Search grounding), resume-based question matching, interview  difficulty levels, timed camera-recorded interview rounds
+- [x] **Day 20** — Researched Gemini's Google Search grounding (found a Google-side API 
+  key rollout issue affecting authentication; pivoted approach)
+- [x] **Day 21** — Migrated AI layer to Groq (free, OpenAI-compatible) after the Gemini 
+  key issue; tested Tavily (AI-focused search API) for live web search with 
+  source citations
+- [x] **Day 22** — Built backend route (/api/source-questions) combining Tavily 
+  (search) + Groq (extraction) — returns real interview questions with exact 
+  source URLs and difficulty tags, no site-specific scraper needed
+- [x] **Day 23** — Difficulty tagging (basic/intermediate/senior) added automatically 
+  by Groq during extraction
+- [x] **Day 24** — Merged AI-sourced questions into the live question bank; verified 
+  end-to-end with real company/role queries (e.g. Infosys, Wipro)
+- [ ] Next — Persist sourced questions to MongoDB, resume-based question matching, interview difficulty levels (user-facing), timed camera-recorded interview rounds
 
 ## Tech Stack
 
@@ -36,7 +48,8 @@ Most mock interview tools ask generic questions and give generic AI feedback. Mo
 - **Database:** MongoDB Atlas (Mongoose)
 - **Auth:** JWT (jsonwebtoken), bcrypt for password hashing
 - **Data Collection:** Axios, Cheerio, regex-based text extraction
-- **AI:** Google Gemini API for follow-up question generation and STAR-method answer scoring
+- **AI:** Groq (LLM) for follow-up questions and STAR-method answer scoring
+- **Search:** Tavily API for AI-driven, multi-source question sourcing with citation links
 
 
 ## Project Structure
@@ -134,7 +147,13 @@ npm run dev
 
 ## Roadmap
 
-Remaining work: persistent storage (MongoDB) for answers and session history, deployment (frontend + backend), and collecting real user feedback (filler-word reduction over multiple sessions) as proof of impact.
+Actively expanding into a more complete interview-prep platform:
+
+- AI-driven question sourcing across multiple sites (Google Search grounding) with source-link citations, replacing the single-site scraper
+- Resume upload with AI skill extraction, matched to relevant questions
+- Interview difficulty levels (basic / intermediate / senior)
+- Timed, camera-recorded interview rounds with full-session and per-question feedback
+- Session history, PDF report export, and a readiness-score trend across sessions
 
 ## Author
 
