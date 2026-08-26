@@ -178,6 +178,20 @@ A running log of what was built, what broke, how it was fixed, and what was lear
 **Confirmed working:** Test call for Infosys/Software Developer returned 4 real questions with exact source URLs (interviewquery.com, simplilearn.com) and AI-assigned difficulty levels — validates the full pipeline end-to-end.
 **Not yet done:** This route is not wired into the question bank the live app actually serves (`questions-final.json`). Users still see only the original 49 scraped questions. Connecting sourced questions into the real flow is the next step.
 
+### Day 11-12 — Merged AI-sourced questions into the live question bank
+**Built:** `/api/source-questions` now pushes each AI-sourced question (with company, difficulty, and sourceUrl fields) into `questionBank.technical` in memory, so `/api/question` can randomly serve them alongside the original 49 scraped questions.
+**Verified:** Called `/api/source-questions?company=Wipro&role=Software Engineer`, then checked `/api/questions` and confirmed new entries appeared with IDs like `sourced-Wipro-...` and the correct company/difficulty fields attached.
+**Known limitation:** This is memory-only — sourced questions disappear on server restart. Making them permanent requires saving to MongoDB, which hasn't been done yet (planned for Phase 3 or a dedicated follow-up).
+
+## Phase 2 Complete — Summary
+
+Phase 2's original goal was AI-driven question sourcing across multiple sites with source-link proof, replacing the single-site hand-built scraper from Phase 1. Achieved via:
+- Tavily (search API) finds real interview-question pages across the live web for any company/role query
+- Groq (LLM) extracts clean, structured questions from that content, tags difficulty, and preserves the exact source URL
+- A working backend route (`/api/source-questions`) that merges results into the app's live question bank
+
+Along the way, had to pivot from the original plan (Gemini's Google Search grounding) after Google's API key rollout broke authentication — migrated the whole AI layer to Groq, and split "search" and "extract" into two specialized tools since Groq has no built-in web search. This ended up being a stronger, more flexible architecture than the original single-provider plan.
+
 ## Upcoming: Phase 2 Replacement Note
 
 **What's changing:** The current data collection approach (`checkListing.js` + `dataCollector.js`) is hand-built for GeeksforGeeks specifically — custom Cheerio selectors, custom regex, one hardcoded site.

@@ -44,7 +44,7 @@ mockmate/
 - AI feedback — follow-up questions + STAR scoring via Groq
 - Frontend — React UI with custom design (dark/light theme), voice input/output, audio recording playback
 - Authentication — full signup/login flow, persistent sessions via localStorage
-- AI-driven question sourcing (Phase 2) — `/api/source-questions?company=X&role=Y` route works end-to-end: Tavily searches the live web, Groq extracts structured questions with real source URLs and difficulty tags. As of Day 11, sourced questions are also pushed into the in-memory `questionBank.technical` array, so `/api/question` can randomly return them too — but this is memory-only and resets on server restart. Making this permanent requires saving sourced questions to MongoDB (not yet done).
+- **Phase 2 (AI-driven question sourcing) — COMPLETE.** `/api/source-questions?company=X&role=Y` searches the live web via Tavily, extracts structured questions with real source URLs and difficulty tags via Groq, and merges results into the live `questionBank` so `/api/question` can serve them. Limitation: this merge is memory-only and resets on server restart — not yet persisted to MongoDB.
 
 ## What's Next (in order)
 
