@@ -7,11 +7,9 @@ const jwt = require("jsonwebtoken");
 const cors = require("cors");
 const path = require('path');
 const fs = require('fs');
-const { generateFollowUp, scoreAnswer, sourceQuestionsWithAI } = require('./aiHelper');
+const { generateFollowUp, scoreAnswer, sourceQuestionsWithAI, extractSkillsFromResume } = require('./aiHelper');
 const multer = require('multer');
 const { PDFParse } = require('pdf-parse');
-// console.log('pdfParse type:', typeof pdfParse);
-// console.log('pdfParse content:', pdfParse);
 
 // multer ko memory mein file rakhne ke liye set kiya - disk pe save nahi karte,
 // kyunki humein sirf text nikaalna hai, file permanently rakhni nahi hai
@@ -235,11 +233,13 @@ app.post('/api/upload-resume', upload.single('resume'), async (req, res) => {
     const result = await parser.getText();
     await parser.destroy();   // memory free karne ke liye
 
-
+    const skills = await extractSkillsFromResume(result.text);
+    
     res.json({
       message: 'Resume padh liya',
       textLength: result.text.length,
-      extractedText: result.text
+      // extractedText: result.text
+      skills : skills
     });
   } catch (error) {
     res.status(500).json({ message: 'Resume padhne mein error aaya', error: error.message });

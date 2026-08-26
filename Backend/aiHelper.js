@@ -133,4 +133,25 @@ async function sourceQuestionsWithAI(company, role) {
 }
 
 
-module.exports = { generateFollowUp, scoreAnswer, sourceQuestionsWithAI };
+// resume text se skills/technologies nikalta hai
+async function extractSkillsFromResume(resumeText){
+  const prompt = `Below is text extracted from someone's resume. Carefully read through the ENTIRE 
+    text, including sections labeled "Skills", "Projects", "Experience", and "Education" - technologies 
+    are often mentioned inside project descriptions and experience bullet points, not just in a dedicated 
+    skills section. List every technical skill, programming language, framework, database, and tool 
+    mentioned anywhere in the document, even if mentioned only once.
+    
+    Respond with ONLY a valid JSON array of skill names, no duplicates, no markdown formatting, nothing else. 
+    Example format:
+    ["React", "Node.js", "Java", "SQL"]
+ 
+    Resume text:
+    ${resumeText}`;
+
+  let rawText = await callGroq(prompt);
+  rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+
+  return JSON.parse(rawText);
+}
+
+module.exports = { generateFollowUp, scoreAnswer, sourceQuestionsWithAI, extractSkillsFromResume };
