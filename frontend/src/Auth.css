@@ -255,3 +255,49 @@
   color: var(--accent);
   background: rgba(232, 169, 76, 0.08);
 }
+
+/* practice intro / walkthrough */
+.intro-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 8px 0 24px 0;
+}
+ 
+.intro-step {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+ 
+.intro-step-number {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(232, 169, 76, 0.12);
+  color: var(--accent);
+  border: 1px solid rgba(232, 169, 76, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+}
+ 
+.intro-step-title {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin: 0 0 3px 0;
+}
+ 
+.intro-step-desc {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}

@@ -1,11 +1,14 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import './App.css'
 // import App from './App.jsx'
-import ResumeUpload from './ResumeUpload.jsx'
+// import ResumeUpload from './ResumeUpload.jsx'
+import Practiceintro from './Practiceintro.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     {/* <App /> */}
-    <ResumeUpload  onContinue={(data) => console.log('Continue clicked with:', data)}  />
+    {/* <ResumeUpload /> */}
+    <Practiceintro onReady={() => console.log('Ready clicked!')} />
   </StrictMode>,
 )
