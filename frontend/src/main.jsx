@@ -6,6 +6,6 @@ import ResumeUpload from './ResumeUpload.jsx'
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     {/* <App /> */}
-    <ResumeUpload />
+    <ResumeUpload  onContinue={(data) => console.log('Continue clicked with:', data)}  />
   </StrictMode>,
 )

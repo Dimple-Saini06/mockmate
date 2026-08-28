@@ -156,3 +156,102 @@
 .setup-skip:hover {
   text-decoration: underline;
 }
+
+/* technology dropdown */
+.tech-dropdown {
+  width: 100%;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 14px;
+  padding: 12px 14px;
+  cursor: pointer;
+}
+ 
+.tech-dropdown:focus-visible {
+  outline: none;
+  border-color: var(--accent-dim);
+}
+
+/* difficulty level selector */
+.difficulty-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+ 
+.difficulty-pill {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 8px;
+  cursor: pointer;
+  font-family: "Space Grotesk", sans-serif;
+  color: var(--text-primary);
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+ 
+.difficulty-pill:hover {
+  border-color: var(--accent-dim);
+}
+ 
+.difficulty-pill.active {
+  border-color: var(--accent);
+  background: rgba(232, 169, 76, 0.1);
+}
+ 
+.difficulty-label {
+  font-size: 13px;
+  font-weight: 500;
+}
+ 
+.difficulty-desc {
+  font-size: 10px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+ 
+/* difficulty level selector */
+.level-label {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 16px 0 8px 0;
+}
+ 
+.level-options {
+  display: flex;
+  gap: 8px;
+}
+ 
+.level-btn {
+  flex: 1;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 13px;
+  padding: 10px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+ 
+.level-btn:hover {
+  border-color: var(--accent-dim);
+}
+ 
+.level-btn-active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(232, 169, 76, 0.08);
+}

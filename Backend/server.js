@@ -246,6 +246,52 @@ app.post('/api/upload-resume', upload.single('resume'), async (req, res) => {
   }
 });
 
+
+// user ki resume skills ke hisaab se relevant questions dhoondta hai
+app.post('/api/match-questions', (req, res) => {
+  const { skills, difficulty } = req.body;
+ 
+  if (!skills || !Array.isArray(skills) || skills.length === 0) {
+    return res.status(400).json({ message: 'skills array chahiye body mein' });
+  }
+ 
+  // saare categories ke saare questions ko ek single array mein jodo
+  const allQuestions = [
+    ...questionBank.technical,
+    ...questionBank.hr,
+    ...questionBank.behavioral
+  ];
+ 
+  // har skill ko lowercase karo taaki matching case-insensitive ho
+  const lowerSkills = skills.map(s => s.toLowerCase());
+ 
+  // sirf wahi questions rakho jinke text mein koi skill mention ho
+  const matchedQuestions = allQuestions.filter(q => {
+    const questionLower = q.question.toLowerCase();
+    return lowerSkills.some(skill => questionLower.includes(skill));
+  });
+ 
+  // agar difficulty diya gaya hai, aur question mein difficulty field hai
+  // (sourced questions mein hoti hai, purane scraped questions mein nahi),
+  // usse bhi filter karo
+  if (difficulty) {
+    const difficultyFiltered = matchedQuestions.filter(q => q.difficulty === difficulty);
+    // agar difficulty filter se kuch questions bache, wahi do
+    // warna sab matched questions hi de do (taaki khali result na aaye)
+    if (difficultyFiltered.length > 0) {
+      matchedQuestions = difficultyFiltered;
+    }
+  }
+
+  res.json({
+    totalQuestions: allQuestions.length,
+    matchedCount: matchedQuestions.length,
+    difficulty: difficulty || 'any',
+    questions: matchedQuestions
+  });
+});
+
+
 app.get('/api/answers', (req, res) => {
   res.json(submittedAnswers);
 });
