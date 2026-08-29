@@ -332,3 +332,23 @@
   width: 100%;
   display: block;
 }
+
+/* countdown timer */
+.timer-display {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--text-primary);
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  padding: 6px 18px;
+  display: inline-block;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+ 
+.timer-warning {
+  color: var(--danger);
+  border-color: var(--danger);
+  animation: pulse-red 1s infinite;
+}
