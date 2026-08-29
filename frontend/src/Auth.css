@@ -1,4 +1,4 @@
-.outer-div {
+.auth-shell {
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -7,7 +7,7 @@
   padding: 20px;
 }
  
-.inner-div {
+.auth-card {
   width: 100%;
   max-width: 380px;
   background: var(--surface);
@@ -16,7 +16,7 @@
   padding: 32px;
 }
  
-.title {
+.auth-title {
   font-family: "Fraunces", serif;
   font-weight: 500;
   font-size: 28px;
@@ -25,7 +25,7 @@
   text-align: center;
 }
  
-.sub-title {
+.auth-subtitle {
   font-family: "Space Grotesk", sans-serif;
   color: var(--text-secondary);
   font-size: 13px;
@@ -88,7 +88,6 @@
   text-decoration: underline;
 }
  
-
 /* resume upload / setup screen */
 .setup-card {
   width: 100%;
@@ -156,7 +155,7 @@
 .setup-skip:hover {
   text-decoration: underline;
 }
-
+ 
 /* technology dropdown */
 .tech-dropdown {
   width: 100%;
@@ -174,7 +173,7 @@
   outline: none;
   border-color: var(--accent-dim);
 }
-
+ 
 /* difficulty level selector */
 .difficulty-row {
   display: flex;
@@ -255,7 +254,7 @@
   color: var(--accent);
   background: rgba(232, 169, 76, 0.08);
 }
-
+ 
 /* practice intro / walkthrough */
 .intro-steps {
   display: flex;
@@ -300,4 +299,36 @@
   color: var(--text-secondary);
   margin: 0;
   line-height: 1.5;
+}
+ 
+/* setup check - mic/camera test */
+.check-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+ 
+.check-status {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 12px;
+  margin: 2px 0 0 0;
+}
+ 
+.check-status-untested { color: var(--text-secondary); }
+.check-status-testing { color: var(--accent); }
+.check-status-working { color: var(--success); }
+.check-status-failed { color: var(--danger); }
+ 
+.camera-preview-box {
+  margin-top: 16px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+ 
+.camera-preview {
+  width: 100%;
+  display: block;
 }
