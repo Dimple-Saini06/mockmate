@@ -61,6 +61,16 @@ export default function App() {
   // pressure round mode - jab on ho, timer dikhta hai aur time khatam hone par auto-submit hota hai
   const [pressureMode, setPressureMode] = useState(false);
  
+  // camera on/off state
+  const [isCameraOn, setIsCameraOn] = useState(false);
+  const videoStreamRef = useRef(null);
+  const videoElementRef = useRef(null);
+ 
+  // camera on/off state
+  const [cameraOn, setCameraOn] = useState(false);
+  const videoPreviewRef = useRef(null);
+  const cameraStreamRef = useRef(null);
+ 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('theme', theme);
@@ -74,6 +84,29 @@ export default function App() {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);
+  }
+ 
+  async function toggleCamera() {
+    if (cameraOn) {
+      // camera band karo
+      if (cameraStreamRef.current) {
+        cameraStreamRef.current.getTracks().forEach(track => track.stop());
+        cameraStreamRef.current = null;
+      }
+      setCameraOn(false);
+    } else {
+      // camera chalu karo
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        cameraStreamRef.current = stream;
+        if (videoPreviewRef.current) {
+          videoPreviewRef.current.srcObject = stream;
+        }
+        setCameraOn(true);
+      } catch (err) {
+        alert('Camera access nahi mila: ' + err.message);
+      }
+    }
   }
  
   useEffect(() => {
@@ -118,6 +151,41 @@ export default function App() {
     recognition.start();
     setIsListening(true);
   }
+ 
+  async function toggleCamera() {
+    if (isCameraOn) {
+      // camera band karo
+      if (videoStreamRef.current) {
+        videoStreamRef.current.getTracks().forEach(track => track.stop());
+        videoStreamRef.current = null;
+      }
+      setIsCameraOn(false);
+ 
+      // camera ke saath mic bhi band kar do
+      if (isListening) {
+        stopListening();
+      }
+    } else {
+      // camera on karo
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        videoStreamRef.current = stream;
+        setIsCameraOn(true);
+ 
+        // camera ke saath mic bhi automatically start kar do
+        startListening();
+      } catch (err) {
+        console.log('Camera error:', err.message);
+      }
+    }
+  }
+ 
+  // jab camera ON ho aur <video> tag render ho chuka ho, tabhi stream assign karo
+  useEffect(() => {
+    if (isCameraOn && videoElementRef.current && videoStreamRef.current) {
+      videoElementRef.current.srcObject = videoStreamRef.current;
+    }
+  }, [isCameraOn]);
  
   function stopListening() {
     if (recognitionRef.current) {
@@ -171,8 +239,17 @@ export default function App() {
           <div>
             <h1 className="title">MockMate</h1>
             <p className="subtitle">Real interview questions. Honest feedback. No fluff.</p>
+ 
+        {cameraOn && (
+          <div className="self-camera-box">
+            <video ref={videoPreviewRef} autoPlay playsInline muted className="self-camera-video" />
+          </div>
+        )}
           </div>
           <div className="header-buttons">
+            <button className="btn btn-secondary theme-btn" onClick={toggleCamera}>
+              {cameraOn ? 'Turn Camera Off' : 'Turn Camera On'}
+            </button>
             <button className="btn btn-secondary theme-btn" onClick={toggleTheme}>
               {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
             </button>
@@ -207,7 +284,17 @@ export default function App() {
                 />
                 Pressure round (60s)
               </label>
+ 
+              <button className="btn btn-secondary camera-toggle-btn" onClick={toggleCamera} type="button">
+                {isCameraOn ? 'Turn Camera Off' : 'Turn Camera On'}
+              </button>
             </div>
+ 
+            {isCameraOn && (
+              <div className="camera-preview-box">
+                <video ref={videoElementRef} autoPlay playsInline muted className="camera-preview" />
+              </div>
+            )}
  
             {pressureMode && !result && (
               <Timer
@@ -308,4 +395,3 @@ export default function App() {
     </div>
   );
 }
- 

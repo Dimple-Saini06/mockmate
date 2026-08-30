@@ -503,3 +503,9 @@ body {
   color: var(--text-secondary);
   cursor: pointer;
 }
+
+/* camera toggle in main interview flow */
+.camera-toggle-btn {
+  padding: 6px 14px;
+  font-size: 12px;
+}

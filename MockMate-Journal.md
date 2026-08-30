@@ -192,6 +192,61 @@ Phase 2's original goal was AI-driven question sourcing across multiple sites wi
 
 Along the way, had to pivot from the original plan (Gemini's Google Search grounding) after Google's API key rollout broke authentication — migrated the whole AI layer to Groq, and split "search" and "extract" into two specialized tools since Groq has no built-in web search. This ended up being a stronger, more flexible architecture than the original single-provider plan.
 
+---
+
+## Phase: Personalized Setup (Day 13+)
+
+### Day 13 — Resume upload UI
+**Built:** `ResumeUpload.jsx` — a file input restricted to PDFs (`accept="application/pdf"`), shows the selected filename, validates file type client-side, includes a "skip and pick a technology instead" fallback path.
+**Learned:** `accept` on a file input isn't just a hint — browsers actively filter the file picker dialog to match, though it's not a hard security boundary (still worth validating server-side too).
+
+### Day 14 — Backend resume upload + PDF text extraction
+**Built:** `POST /api/upload-resume` using `multer` (memory storage, not disk — the file is only needed transiently to extract text) and `pdf-parse` to read the PDF and return its raw text.
+**Issue:** `pdfParse is not a function` — `pdf-parse` v2 replaced the old v1 function-call API (`pdfParse(buffer)`) with a class-based API (`new PDFParse({ data: buffer }); await parser.getText();`). Had to look up the current API since it's a breaking change from what's commonly documented in older tutorials.
+**Verified:** Uploaded a real resume via Hoppscotch (multipart/form-data, field name `resume` — must match `upload.single('resume')` exactly or multer throws "Unexpected field"), got back the full extracted text correctly, including skills, experience, and project sections.
+**Learned:** File uploads use `multipart/form-data`, not JSON — a different request shape from every other route in this project so far. npm packages can have breaking API changes between major versions; always check current docs rather than assuming an older pattern still applies.
+
+### Day 15 — AI skill extraction from resume text
+**Built:** `extractSkillsFromResume()` in `aiHelper.js` — sends the resume's extracted text to Groq with a prompt asking it to list every technical skill mentioned, returned as a JSON array. Wired into `/api/upload-resume`, so uploading a resume now returns both the raw text length and a clean skills list in one call.
+**Issue:** First version of the prompt only found skills from a dedicated "Skills" section (6 results) — missed technologies mentioned inside project/experience bullet points (React, Node.js, Express, Axios, Cheerio, OpenWeather API, etc.), even though they were clearly present in the extracted text.
+**Fix:** Made the prompt explicitly instruct the model to read the entire document, not just a skills section, and specifically mentioned that projects/experience often list technologies inline. Re-running on the same resume went from 6 skills to 21, correctly picking up project-level tech mentions.
+**Learned:** LLM prompt specificity matters a lot for extraction tasks — a vague instruction ("find the skills") defaults to the most obvious location (a labeled section) rather than reasoning across the whole document; being explicit about *where* to look measurably changed the result.
+
+### Day 16 — Match resume skills to question bank
+**Built:** `POST /api/match-questions` — takes a skills array (from Day 15's extraction), flattens all questions across technical/hr/behavioral into one list using the spread operator, and filters to only questions whose text mentions at least one skill (case-insensitive).
+**Result:** Logic works correctly, but only 2 of 46 questions matched for skills like React/Node.js/Java/SQL — because the existing scraped question bank is mostly generic ("What is Encapsulation?") rather than skill-specific ("What are React Hooks?"), so literal keyword matches are rare.
+**Not a bug — a data limitation.** The real fix is combining this with Day 10's AI sourcing: calling `/api/source-questions` with a skill name as the "company"/topic (e.g. search for "React interview questions") would produce genuinely skill-specific questions from the live web, giving far richer matches than filtering the static scraped set. Noted as a future improvement rather than implemented yet, to keep Day 16 scoped to the matching logic itself.
+
+### Day 17 — Manual technology picker (no-resume path)
+**Built:** `ResumeUpload.jsx` now has a second internal screen — clicking "Skip" reveals a dropdown of technologies (React, Java, Python, etc.) instead of immediately continuing with no data. Controlled by a `showTechPicker` boolean state within the same component.
+**Learned:** A single component can render entirely different UI based on internal state, without needing a separate route or component — useful for short, linear flows like this setup step.
+
+### Day 18 — Interview difficulty level selector
+**Built:** Added a Basic / Intermediate / Senior button group to the technology-picker screen; selected level is highlighted and passed to `onContinue` alongside the chosen technology. Updated `/api/match-questions` to optionally filter by `level`, falling back to all matched questions if no level-tagged questions exist yet (since the original scraped question bank has no difficulty field — only AI-sourced questions from Phase 2 do).
+**Issue:** Testing `ResumeUpload` standalone (temporarily rendering it directly in `main.jsx`) threw "onContinue is not a function" — the component expects a function prop from its parent (`App.jsx`), which wasn't provided when rendering it in isolation. Fixed by passing a temporary dummy function (`(data) => console.log(...)`) purely for testing, then reverting `main.jsx` back to rendering `App` afterward.
+**Learned:** Components that expect props from a parent will error if tested in isolation without providing those props — a quick inline dummy function is enough to unblock testing without needing the real integration yet.
+
+## Phase 3 Progress Note
+
+Resume upload, skill extraction, skill-to-question matching, the no-resume technology picker, and the difficulty selector are all built and individually tested — but **not yet wired into the actual app flow** (`App.jsx` doesn't render `ResumeUpload` yet, and login doesn't lead into it). That integration, plus actually using the selected technology/level to fetch tailored questions (likely combining with Day 10's AI sourcing), is the next step.
+
+### Day 21 — Countdown timer component
+**Built:** `Timer.jsx` — a reusable countdown using `setInterval`, displays MM:SS, turns red in the last 10 seconds, calls `onTimeUp` when it hits zero.
+**Learned:** Always clean up `setInterval` in a `useEffect` return function, or it keeps running in the background after the component unmounts (memory leak / stale updates).
+
+### Day 22 — Wired timer into the real interview flow (auto-submit)
+**Built:** Added a "Pressure round" checkbox in `App.jsx` — when on, a `Timer` appears next to the question and calls `submitAnswer` automatically when time runs out, whatever's currently in the answer box.
+**Issue:** React warning — "Cannot update a component while rendering a different component" — caused by `Timer` calling `onTimeUp` (which triggers a state update in `App`) at the exact same moment `Timer` was updating its own internal state.
+**Fix:** Deferred the `onTimeUp` call with `setTimeout(onTimeUp, 0)`, letting `Timer`'s own render finish first before `App`'s state changes — a common pattern when one component's callback needs to update a different component's state.
+**Also learned:** `key={question.id}` on `Timer` forces React to fully remount it (fresh state) whenever the question changes, instead of trying to reuse the old instance — simpler than manually resetting timer state.
+
+### Day 23-24 — Camera on/off toggle with live preview
+**Built:** A camera toggle button using `getUserMedia({ video: true })`; when on, shows a live `<video>` preview.
+**Issue:** Camera permission was granted (hardware light turned on) but no video appeared on screen — traced to a React timing bug: `videoElementRef.current.srcObject = stream` was being set *before* `setIsCameraOn(true)`, but the `<video>` tag only exists in the DOM once `isCameraOn` is true (it's conditionally rendered) — so the ref was still `null` when the assignment happened.
+**Fix:** Split into two steps — set `isCameraOn(true)` first (so React renders the `<video>` tag), then a separate `useEffect` watching `isCameraOn` assigns the stream once the element actually exists.
+**Design note:** Camera is currently preview-only — it is NOT combined with audio into a single recorded file yet. Turning the camera on also auto-triggers `startListening()` (voice recognition + separate audio recording), but the video feed itself isn't being recorded — that's the actual goal of Day 25 (full-session video recording), not yet built.
+**Learned:** When a ref target is conditionally rendered, any code trying to use that ref must run *after* the condition becomes true and a re-render has happened — usually via `useEffect`, not inline in the same function that flips the condition.
+
 ## Upcoming: Phase 2 Replacement Note
 
 **What's changing:** The current data collection approach (`checkListing.js` + `dataCollector.js`) is hand-built for GeeksforGeeks specifically — custom Cheerio selectors, custom regex, one hardcoded site.

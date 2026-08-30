@@ -1,7 +1,8 @@
 const fs = require('fs');
 const path = require('path');
  
-const inputPath = path.join(__dirname, 'extracted-questions.json');
+// const inputPath = path.join(__dirname, 'extracted-questions.json');
+const inputPath = path.join(__dirname, 'extractQuestions.js');
 const questions = JSON.parse(fs.readFileSync(inputPath, 'utf-8'));
  
 // har category ke liye keywords - agar question mein yeh words hon, wahi category milegi
